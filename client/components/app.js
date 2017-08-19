@@ -61,7 +61,7 @@ angular.module('main')
 
 
   .component('app', {
-    controller: function(serverComm) {
+    controller: function(serverComm, $ctrl) {
       serverComm.getImages(/*this.renderimages*/);
       this.images = window.actualImageData;
       this.topfiveimages = this.images.sort(function(a, b) {
@@ -91,6 +91,21 @@ angular.module('main')
         //push images to yourmostlikeimages array
       }
 
+      this.location = {};
+
+      this.getLocation = () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+            return pos;
+          })
+        }
+      }
+
+      console.log(this.getLocation());
       // serverComm.postContent({
       //     id: 'FKE7Brb',
       //     userId: 1,

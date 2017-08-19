@@ -4,25 +4,24 @@ angular.module('main')
   controller: ($scope) => {
     var map;
     var infoWindow;
-    function initMap() {
+    console.log(console.log($scope), "@@@@@@@@@@@@@@@@@")
+    function initMap(cb) {
       map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: -34.397, lng: 150.644},
-        zoom: 6
+        zoom: 8
       });
       infoWindow = new google.maps.InfoWindow;
-
-      // Try HTML5 geolocation.
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
           var pos = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          console.log(pos);
           infoWindow.setPosition(pos);
           infoWindow.setContent('Location found.');
           infoWindow.open(map);
           map.setCenter(pos);
+          cb(pos);
         }, function() {
           handleLocationError(true, infoWindow, map.getCenter());
         });
@@ -38,13 +37,23 @@ angular.module('main')
         'Error: The Geolocation service failed.' :
         'Error: Your browser doesn\'t support geolocation.');
         infoWindow.open(map);
-      }
-    //needs information about app usage from everywhere it's being used
+    }
+
+      // Try HTML5 geolocation.
+    //needs information aboutapp usage from everywhere it's being used
 
     //somehow renders hot spots onto a map based on that data
     //will need a map image that registers location
     //something with google maps might make this doable?
-    initMap();
+    initMap((pos) => {
+      console.log(pos)
+      $scope.location = pos;
+      console.log($scope);
+    });
+  },
+  bindings: {
+    getLocation : '=',
+    location : '='
   },
   templateUrl: '../templates/heat-map.html'
 });
