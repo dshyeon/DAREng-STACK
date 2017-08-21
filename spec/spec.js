@@ -10,53 +10,67 @@ describe('Server Unit Tests', function () {
       .get('/')
       .expect(200, done);
   });
-  it('responds to /images', function testPath(done) {
-    console.log('test image route')
+  it('responds to nonexistent path with 404', function testSlash(done) {
     request(server)
-      .get('/images')
-      .expect(302, done);
+      .get('/foobar')
+      .expect(404, done);
   });
-  it('responds to /login', function testPath(done) {
-    console.log('test login route')
-    request(server)
-      .get('/login')
-      .expect(302, done);
-  });
-  it('responds to /signup', function testPath(done) {
-    console.log('test signup route')
-    request(server)
-      .get('/signup')
-      .expect(201, done);
-  });
+  // it('responds to /images', function testPath(done) {
+  //   console.log('test image route')
+  //
+  //   request(server)
+  //     .get('/images')
+  //     .expect(302, done);
+  // });
 });
 
 describe('database Unit Tests', function () {
   var server;
   beforeEach(function () {
-    db = require('./../database/index.js');
+    db = require('../database/index.js');
   });
-  it('responds to /', function testSlash(done) {
-    request(server)
-      db.get('/')
-      db.expect(200, done);
-  });
-  it('responds to /images', function testPath(done) {
+  it('posts image to db working', function testPath(done) {
     console.log('test image route')
-    request(server)
-      db.get('/images')
-      db.expect(302, done);
+    var pic = {
+      id: '5',
+      imageUrl: 'http://imgur.com/gallery/jtjT0',
+      geoLocation: [-122.48, 37.78]
+    }
+    // request(server)
+    db.saveImage(pic.imageUrl, pic.geoLocation);
+    db.findNear(pic.geoLocation, (err, results) => {
+      expect(results).to.exist;
+    });
+    done();
   });
-  it('responds to /login', function testPath(done) {
-    console.log('test login route')
+  it('get images from database works', function testSlash(done) {
     request(server)
-      db.get('/login')
-      db.expect(302, done);
+      db.findNear([-122.48, 37.78], (err, result) => {
+        expect(err).to.exist;
+      })
+      db.saveImage('www.this.com', [0,0]);
+      db.findNear([0,0], (err, results) => {
+        expect(results).to.exist;
+      });
+      done();
   });
-  it('responds to /signup', function testPath(done) {
-    console.log('test signup route')
-    request(server)
-      db.get('/signup')
-      db.expect(201, done);
+  it('gets images within the correct radius', function testPath(done) {
+    var pic = {
+      id: '5',
+      imageUrl: 'http://imgur.com/gallery/jtjT0',
+      geoLocation: [-122.48, 37.78]
+    }
+    // request(server)
+    db.saveImage(pic.imageUrl, [-122.48, 37.78]);
+    db.saveImage(pic.imageUrl, [-122.5, 37.8]);
+    db.saveImage(pic.imageUrl, [-122.4, 37.7]);
+    db.saveImage(pic.imageUrl, [-140, 30]);
+
+    db.findNear(pic.geoLocation, (err, results) => {
+      expect(results.length).to.equal(3);
+    });
+    done();
+
   });
 });
 
@@ -84,6 +98,8 @@ describe('Node Server to Database connection tests', function () {
       comments: Array,
       voteCount: Number,
     });
+    var User = mongoose.model('User', userSchema, 'users');
+    var Image = mongoose.model('Image', imageSchema, 'images');
   });
   afterEach(function() {
     db.end();
@@ -91,7 +107,7 @@ describe('Node Server to Database connection tests', function () {
   it('responds to get images request with array', function testSlash(done) {
     request(db)
       .get('/images')
-      .expect(res.body );
+      .expect(res.body);
   });
   it('responds to /images', function testPath(done) {
     console.log('test image route')

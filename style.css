@@ -45,7 +45,6 @@ body {
   background-color: rgba(172, 247, 255, 0.75);
   width: 200px;
   height: 200px;
-
 }
 .img-circle {
   width: 50px;
@@ -63,7 +62,7 @@ body {
 .btn-danger {
   background-color: #FFB4BB
 }
-/* Optional: Makes the sample page fill the window. 
+/* Optional: Makes the sample page fill the window.
 html, body {
   height: 100%;
   margin: 0;
